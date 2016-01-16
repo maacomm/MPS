@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:security="http://www.springframework.org/schema/security"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xmlns:context="http://www.springframework.org/schema/context"
+ xmlns:mvc="http://www.springframework.org/schema/mvc"
+ xsi:schemaLocation="http://www.springframework.org/schema/beans
+ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+ http://www.springframework.org/schema/mvc
+ http://www.springframework.org/schema/mvc/spring-mvc.xsd
+ http://www.springframework.org/schema/context
+ http://www.springframework.org/schema/context/spring-context-3.0.xsd
+ http://www.springframework.org/schema/security 
+ http://www.springframework.org/schema/security/spring-security-3.0.4.xsd">
+		
+		
+	<context:component-scan base-package="com.mps.controller" />
+	<mvc:annotation-driven />
+    
+    <mvc:resources mapping="/resources/**" location="/resources/" />
+	<mvc:resources location="/resources/css/" mapping="/css/**" />
+	<mvc:resources location="/resources/js/" mapping="/js/**" />
+	<mvc:resources location="/resources/images/" mapping="/images/**" />
+
+    <mvc:resources mapping="/resources/**" location="/resources/" />
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+      <property name="prefix" value="/WEB-INF/jsp/" />
+      <property name="suffix" value=".jsp" />
+   </bean>
+	 <bean id="ds" class="org.springframework.jdbc.datasource.DriverManagerDataSource">  
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />  
+		<property name="url" value="jdbc:mysql://localhost:3306/mps" />  
+		<property name="username" value="root" />  
+		<property name="password" value="" />  
+	</bean>  
+  
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">  
+	<property name="dataSource" ref="ds"></property>  
+	</bean>
+	 
+    
+    <bean id="userDao" class="com.mps.dao.UserDaoImpl"></bean>
+      
+    <bean id="userService" class="com.mps.service.UserServiceImpl">
+          
+    </bean>
+   <!--   <bean id="employeeService" class="com.pmt.service.EmployeeServiceImpl"></bean>
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="5000000" />
+	</bean>-->
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <property name="basename" value="/WEB-INF/messages" />
+    </bean>
+        <security:http auto-config="true" use-expressions="true">
+        <security:intercept-url pattern="/welcome**" access="hasAnyRole('ROLE_USER','ROLE_LEAD','ROLE_ADMIN')" />
+        <security:intercept-url pattern="/dashboard**" access="hasAnyRole('ROLE_LEAD','ROLE_ADMIN')" />
+        
+        
+           
+        <security:intercept-url pattern="/savestoryfile**" access="hasAnyRole('ROLE_USER','ROLE_LEAD','ROLE_ADMIN')" /> 
+        <security:intercept-url pattern="/createstory**" access="hasAnyRole('ROLE_LEAD','ROLE_ADMIN')" />       
+        <security:intercept-url pattern="/editPage**" access="hasAnyRole('ROLE_LEAD','ROLE_ADMIN')" /> 
+        <security:intercept-url pattern="/updateStory**" access="hasAnyRole('ROLE_USER','ROLE_LEAD','ROLE_ADMIN')" /> 
+        <security:intercept-url pattern="/searchList**" access="hasAnyRole('ROLE_USER','ROLE_LEAD','ROLE_ADMIN')" /> 
+        <security:intercept-url pattern="/searchStoryListDashboard**" access="hasAnyRole('ROLE_USER','ROLE_LEAD','ROLE_ADMIN')" />        
+        <security:intercept-url pattern="/export**" access="hasAnyRole('ROLE_ADMIN','ROLE_LEAD')" /> 
+        <security:intercept-url pattern="/activitylogger**" access="hasAnyRole('ROLE_USER','ROLE_LEAD','ROLE_ADMIN')" />       
+        <security:intercept-url pattern="/storydownload**" access="hasAnyRole('ROLE_ADMIN','ROLE_LEAD')" /> 
+        <security:intercept-url pattern="/empdownload**" access="hasRole('ROLE_ADMIN')" /> 
+        <security:intercept-url pattern="/inactivestory**" access="hasAnyRole('ROLE_LEAD','ROLE_ADMIN')" />
+            
+            
+        <security:intercept-url pattern="/uploadxls**" access="hasAnyRole('ROLE_ADMIN','ROLE_LEAD')" /> 
+        <security:intercept-url pattern="/addfiles**" access="hasAnyRole('ROLE_ADMIN','ROLE_LEAD')" />     
+        <security:intercept-url pattern="/utilities**" access="hasAnyRole('ROLE_ADMIN','ROLE_LEAD')" /> 
+        <security:intercept-url pattern="/summary**" access="hasAnyRole('ROLE_ADMIN','ROLE_LEAD')" /> 
+        <security:intercept-url pattern="/employee/**" access="hasRole('ROLE_ADMIN')" />  
+                  
+        <security:intercept-url pattern="/changepwd**" access="hasAnyRole('ROLE_USER','ROLE_LEAD','ROLE_ADMIN')" />  
+        <security:intercept-url pattern="/changepwdconfirm**" access="hasAnyRole('ROLE_USER','ROLE_LEAD','ROLE_ADMIN')" />  
+        <security:intercept-url pattern="/403**" access="permitAll" /> 
+        	
+		<!-- access denied page -->
+		<security:access-denied-handler ref="accessDeniedHandler"/>    
+		
+		<security:intercept-url pattern="/login.jsp*" filters="none"/>
+		<security:intercept-url pattern="/resources/**" filters="none"/>
+		<security:intercept-url pattern="/resources/css/" filters="none"/>
+		<security:intercept-url pattern="/resources/js/" filters="none"/>
+		<security:intercept-url pattern="/resources/images/" filters="none"/>
+		<security:intercept-url pattern="j_spring_security_check" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<security:intercept-url pattern="/**" access="ROLE_USER" />
+		<security:form-login login-page="/login.jsp" authentication-failure-url="/login.jsp?error=true"  authentication-success-handler-ref="myAuthenticationSuccessHandler" />
+		<security:logout logout-url="/logout.jsp" />
+		
+	</security:http>
+	<security:authentication-manager>
+     <!--  <security:authentication-provider user-service-ref="extUserDetailsService"/>-->
+     <security:authentication-provider>
+         <!--   <security:password-encoder hash="md5"/> -->
+        <security:jdbc-user-service data-source-ref="ds"  
+			      users-by-username-query="select username, password,enabled from user where username=?" 
+			          authorities-by-username-query="select us.username as username, ur.role as role from user us, user_roles ur 
+			        where us.username = ur.username and us.username =?  " 
+			/>
+        
+        </security:authentication-provider>
+     
+	</security:authentication-manager>
+
+	
+	<bean id="myAuthenticationSuccessHandler" class="com.mps.security.AuthenticationFilter">
+		 <property name="serviceInter" ref="userService"></property>
+	</bean>
+	
+	<!--  <bean class="org.springframework.web.servlet.view.XmlViewResolver">
+	   <property name="location">
+	       <value>/WEB-INF/spring-excel-views.xml</value>
+	   </property>
+	   <property name="order" value="0" />
+	</bean>-->
+	 <bean id="accessDeniedHandler" class="com.mps.util.MyAccessDeniedHandler">
+		 <property name="accessDeniedUrl" value="/PMT/403.jsp" />
+	 </bean>
+
+</beans>
